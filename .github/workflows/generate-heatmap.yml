@@ -1,20 +1,73 @@
-name: Generate Heatmap
-
+name: Generate 3D Heatmap
 on:
   schedule:
-    - cron: '0 0 * * *'
-  workflow_dispatch:
+    - cron: '0 0 * * 0'  # 每周日凌晨执行
+  workflow_dispatch:      # 允许手动触发
 
 jobs:
   generate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
-      - name: Generate Heatmap
-        uses: lowlighter/metrics@latest
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          filename: heatmap.svg
-          token: ${{ secrets.METRICS_TOKEN }}
-          plugin_contributions: yes
-          plugin_contributions_sections: repositories
-          config_timezone: Asia/Shanghai
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install gitpython matplotlib numpy pandas plotly kaleido
+
+      - name: Generate 3D Heatmap
+        env:
+          GITHUB_TOKEN: ${{ secrets.HEATMAP_TOKEN }}
+        run: |
+          python - <<EOF
+          import git
+          import pandas as pd
+          import plotly.express as px
+          from datetime import datetime, timedelta
+
+          # 克隆仓库历史记录
+          repo = git.Repo('.')
+          commits = list(repo.iter_commits('main'))
+
+          # 处理提交数据
+          data = []
+          for commit in commits:
+              date = commit.committed_date
+              data.append({
+                  'date': datetime.fromtimestamp(date),
+                  'day': (datetime.fromtimestamp(date) - timedelta(hours=8)).date()  # 转换时区
+              })
+
+          df = pd.DataFrame(data)
+          df['week'] = df['date'].dt.isocalendar().week
+          df['year'] = df['date'].dt.year
+
+          # 生成3D热力图
+          fig = px.scatter_3d(
+              df,
+              x='year',
+              y='week',
+              z='day',
+              color='day',
+              title='3D Contribution Heatmap'
+          )
+          fig.update_traces(marker=dict(size=3, line=dict(width=0)))
+          fig.write_html('heatmap_3d.html')
+
+          # 提交回仓库
+          repo.git.add('heatmap_3d.html')
+          repo.index.commit(f'chore: update 3D heatmap {datetime.now().isoformat()}')
+          EOF
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.HEATMAP_TOKEN }}
+          branch: main
