@@ -1,18 +1,30 @@
 name: Generate 3D Heatmap
 on:
   schedule:
-    - cron: '0 0 * * 0'  # 每周日凌晨执行
+    - cron: '0 0 * * 0'  # 每周日0点执行
   workflow_dispatch:      # 允许手动触发
 
 jobs:
   generate:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write     # 允许写入仓库内容
+      actions: read       # 允许读取工作流状态
+
     steps:
+      # 1. 基础环境配置
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # 获取完整提交历史（解决冲突关键）
+          ref: main         # 明确指定操作分支
 
+      - name: Configure Git Identity
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      # 2. 依赖安装
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -22,6 +34,7 @@ jobs:
         run: |
           pip install gitpython matplotlib numpy pandas plotly kaleido
 
+      # 3. 核心数据处理与可视化
       - name: Generate 3D Heatmap
         env:
           GITHUB_TOKEN: ${{ secrets.HEATMAP_TOKEN }}
@@ -42,7 +55,7 @@ jobs:
               date = commit.committed_date
               data.append({
                   'date': datetime.fromtimestamp(date),
-                  'day': (datetime.fromtimestamp(date) - timedelta(hours=8)).date()  # 转换时区
+                  'day': (datetime.fromtimestamp(date) - timedelta(hours=8)).date()
               })
 
           df = pd.DataFrame(data)
@@ -61,13 +74,31 @@ jobs:
           fig.update_traces(marker=dict(size=3, line=dict(width=0)))
           fig.write_html('heatmap_3d.html')
 
-          # 提交回仓库
-          repo.git.add('heatmap_3d.html')
-          repo.index.commit(f'chore: update 3D heatmap {datetime.now().isoformat()}')
+          # 生成额外格式（可选）
+          fig.write_image("heatmap_3d.png", width=1600, height=900, scale=2)
+          df.to_csv('heatmap_data.csv', index=False)
           EOF
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.HEATMAP_TOKEN }}
-          branch: main
+      # 4. 冲突解决与提交
+      - name: Resolve conflicts and push
+        run: |
+          # 尝试自动合并远程变更
+          git pull --rebase origin main || exit 1
+
+          # 添加生成的文件
+          git add heatmap_3d.html heatmap_3d.png heatmap_data.csv
+
+          # 提交变更
+          git commit -m "chore: update 3D heatmap [skip ci]" || exit 0
+
+          # 强制推送（最后手段）
+          git push --force-with-lease origin main || \
+          git push --force origin main
+
+      # 5. 调试辅助（可选）
+      - name: Debug Information
+        if: failure()
+        run: |
+          echo "Remote HEAD: $(git ls-remote origin -h refs/heads/main | cut -f1)"
+          echo "Local HEAD: $(git rev-parse HEAD)"
+          git log --oneline -5
