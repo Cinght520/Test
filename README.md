@@ -1,4 +1,4 @@
-# 🚀 Project Nexus - 智能未来接口系统
+# 🚀 Project Nexus -
 
 ![Nexus Interface Preview](https://via.placeholder.com/800x400/0d1117/3a3d47?text=Nexus+Core+Interface)
 
