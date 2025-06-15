@@ -52,8 +52,10 @@ pie
 
 ```
 
-![贡献统计](https://github-readme-stats.vercel.app/api?username=yourusername&show_icons=true)
+# 项目贡献可视化 🚀
 
+![3D Commit Heatmap Preview](https://github.com/USERNAME/REPO/raw/MAIN_BRANCH/heatmap_3d.png)
 
-<img src="https://ghchart.rshah.org/yourusername" alt="贡献日历">
+[查看完整交互式热力图 🔍](https://USERNAME.github.io/REPO/heatmap_3d.html)
 
+> 每周日自动更新，展示过去一年的代码贡献分布
