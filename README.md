@@ -25,3 +25,29 @@ qwq
 
 
 ```
+
+
+# 👨💻 GitHub贡献看板
+
+<!-- 动态指标区 -->
+<div class="metrics">
+  <img src="https://img.shields.io/badge/dynamic/json?logo=github&label=Total%20Commits&query=$.total_commits&url=https://raw.githubusercontent.com/yourusername/yourrepo/main/metrics.json&color=00f7ff">
+  <img src="https://img.shields.io/badge/dynamic/json?logo=github&label=Primary%20Language&query=$.primary_language&url=https://raw.githubusercontent.com/yourusername/yourrepo/main/metrics.json&color=7A00FF">
+  <img src="https://img.shields.io/badge/dynamic/json?logo=github&label=Last%20Active&query=$.last_active&url=https://raw.githubusercontent.com/yourusername/yourrepo/main/metrics.json&color=3776AB&cacheSeconds=3600">
+</div>
+
+
+## 📊 贡献分析
+
+```mermaid
+%%|init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#00f7ff'}}
+pie
+    title 语言分布
+    "Python" : 45
+    "C++" : 30
+    "Rust" : 15
+    "Other" : 10
+
+
+
+```
