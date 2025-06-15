@@ -17,14 +17,4 @@
 ## 💻 快速启动
 
 ```bash
-# 创建量子隔离环境
-qubit init -n nexus_env
-
-# 激活时空扭曲场
-source nexus_env/bin/activate
-
-# 部署反物质容器
-pip install nexus-core[quantum]
-
-# 初始化虫洞连接
-nexus init --portal=alpha
+qwq
