@@ -6,6 +6,8 @@
 ![Python version](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat-square&logo=python)
 ![Framework](https://img.shields.io/badge/Framework-QuantumAI-7A00FF?style=flat-square)
 
+
+<img src="https://via.placeholder.com/600x300/0d1117/3a3d47?text=GALACTIC+STAR+MAP" />
 ## 🌟 核心特性
 
 | 特性                | 技术细节                                                                 |
@@ -19,4 +21,5 @@
 ```bash
 qwq
 
-<img src="https://via.placeholder.com/600x300/0d1117/3a3d47?text=GALACTIC+STAR+MAP" />
+
+
