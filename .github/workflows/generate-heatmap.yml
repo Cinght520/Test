@@ -1,66 +1,73 @@
-名称： Generate 3D Heatmap
-开：
-  时间表：
-    - cron： '0 0 * * 0' # 每周日凌晨执行
-  workflow_dispatch： # 允许手动触发
+name: Generate 3D Heatmap
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # 每周日凌晨执行
+  workflow_dispatch:      # 允许手动触发
 
-工作机会：
-  生成：
-    运行时间：ubuntu-latest
-    权限：
-      内容： 写入
-    步骤：
-      - name：签出仓库
-        用途：作/checkout@v4
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name： 设置 Python
-        使用： actions/setup-python@v4
-        替换为：
-          python 版本： '3.11'
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-      - name：安装依赖项
-        运行： |
-pip install gitpython matplotlib numpy pandas plotly kaleido
-      - 名称： Generate 3D Heatmap
-        环境：
-          GITHUB_TOKEN：${{ secrets。HEATMAP_TOKEN }}
-        运行： |
-python - <<EOF
-导入 Git
-将 pandas 导入为 PD
-将 plotly.express 导入为 px
-from datetime import datetime， timedelta
-# 克隆仓库历史记录
-repo = git 的 git 中。存储库 （'.'）
-提交 = list（repo.iter_commits（'main'））
-# 处理提交数据
-数据 = []
-对于 commits 中的 commit：
-日期 = commit.committed_date
-data.append（{
-'date'： datetime.fromtimestamp（date），
-'day'： （datetime.fromtimestamp（date） - timedelta（hours=8））.date（） # 转换时区
+      - name: Install dependencies
+        run: |
+          pip install gitpython matplotlib numpy pandas plotly kaleido
+
+      - name: Generate 3D Heatmap
+        env:
+          GITHUB_TOKEN: ${{ secrets.HEATMAP_TOKEN }}
+        run: |
+          python - <<EOF
+          import git
+          import pandas as pd
+          import plotly.express as px
+          from datetime import datetime, timedelta
+
+          # 克隆仓库历史记录
+          repo = git.Repo('.')
+          commits = list(repo.iter_commits('main'))
+
+          # 处理提交数据
+          data = []
+          for commit in commits:
+              date = commit.committed_date
+              data.append({
+                  'date': datetime.fromtimestamp(date),
+                  'day': (datetime.fromtimestamp(date) - timedelta(hours=8)).date()  # 转换时区
               })
-df = pd。DataFrame（数据）
-df['week'] = df['date'].dt.isocalendar（）.week
-df['year'] = df['date'].dt.year
-# 生成3D热力图
-图 = px.scatter_3d（
-DF /
-x='year'，
-y='周'，
-z='day'，
-color='day'，
-title='3D 贡献热图'
+
+          df = pd.DataFrame(data)
+          df['week'] = df['date'].dt.isocalendar().week
+          df['year'] = df['date'].dt.year
+
+          # 生成3D热力图
+          fig = px.scatter_3d(
+              df,
+              x='year',
+              y='week',
+              z='day',
+              color='day',
+              title='3D Contribution Heatmap'
           )
-fig.update_traces（marker=dict（size=3， line=dict（width=0）））
-fig.write_html（'heatmap_3d.html'）
-# 提交回仓库
-repo.git.add（'heatmap_3d.html'）
-repo.index.commit（f'chore： 更新 3D 热图 {datetime.now（）.isoformat（）}'）
-EOF
-      - name：推送更改
-        用途：ad-m/github-push-action@master
-        替换为：
-          github_token：${{ secrets。HEATMAP_TOKEN }}
-          分支：main
+          fig.update_traces(marker=dict(size=3, line=dict(width=0)))
+          fig.write_html('heatmap_3d.html')
+
+          # 提交回仓库
+          repo.git.add('heatmap_3d.html')
+          repo.index.commit(f'chore: update 3D heatmap {datetime.now().isoformat()}')
+          EOF
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.HEATMAP_TOKEN }}
+          branch: main
