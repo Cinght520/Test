@@ -1,0 +1,20 @@
+name: Generate Heatmap
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate Heatmap
+        uses: lowlighter/metrics@latest
+        with:
+          filename: heatmap.svg
+          token: ${{ secrets.METRICS_TOKEN }}
+          plugin_contributions: yes
+          plugin_contributions_sections: repositories
+          config_timezone: Asia/Shanghai
