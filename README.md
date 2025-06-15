@@ -7,7 +7,18 @@
 ![Framework](https://img.shields.io/badge/Framework-QuantumAI-7A00FF?style=flat-square)
 
 
-<img src="https://via.placeholder.com/600x300/0d1117/3a3d47?text=GALACTIC+STAR+MAP" />
+## 📡 实时监控面板
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#00f7ff', 'secondaryColor': '#7A00FF'}}}%%
+gauge "系统温度" label: [html {font-size: 14px} 72°C], 72, 90
+gauge "能量输出" label: [html {font-size: 14px} 88%], 88, 100
+
+sparkline
+  title 最近15分钟负载
+  | 45 | 62 | 88 | 73 | 91 | 58 | 42 | 67 | 84 | 79 | 95 | 68 | 52 | 77 | 92 |
+
+
 ## 🌟 核心特性
 
 | 特性                | 技术细节                                                                 |
